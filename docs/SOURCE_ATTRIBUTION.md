@@ -1,15 +1,11 @@
-# Source attribution and redistribution
+# Source attribution and redistribution note
 
-**Course source:** *AWS CloudTrail : suivi, collecte et analyse des journaux*, an EMSI practical assignment supervised by **Pr. JAADOUNI Hatim**.
+**Academic source:** project starter and teaching assignment titled *AWS CloudTrail : suivi, collecte et analyse des journaux*, EMSI, Pr. JAADOUNI Hatim. The runnable core scripts and supplied deterministic synthetic fixtures came from the course exercise; this repository is a portfolio-focused documentation and packaging of the lab work, not a claim that all code was created from scratch by the student.
 
-The core starter scripts and supplied synthetic fixture originate from the course exercise. This repository documents the student's executed experiments and adds portfolio-oriented explanations and packaging. It does not claim that all course code was independently authored.
+**Student-executed work represented:** Docker/LocalStack troubleshooting, service initialization, S3/IAM exercises, activity simulation, collection, threshold experiments, evidence review and incident write-up, with screenshots preserved as selected examples.
 
-**Student work represented:** setup and troubleshooting, S3/IAM manipulation, local API simulation, event collection, threshold testing, evidence investigation, technical reporting and visual explanation.
+**Added repository packaging:** curated public-safe files, root README, FR/EN documentation, Mermaid data-flow diagrams, incident report, troubleshooting notes, CI unit-test workflow, fixture validation helper, optional Docker build DNS overlay, chosen architecture picture and limited screenshots.
 
-**Original documentation and packaging added:** README, analysis walkthrough, rule catalog, environment guide, incident response recommendations and GitHub CI guidance.
+**Redistribution caution:** the original teaching starter did not include an explicit license grant. No license has been invented in this archive. **Before publishing publicly, confirm that the course-provided scripts and fixtures may be redistributed.** If not, use a private repo or publish only the documentation and independently written demonstrations.
 
-**Redistribution notice:** The starter did not include a known explicit distribution license. The repository is currently public; obtain the course owner's authorization before committing redistributable teaching source and fixtures. If authorization is not available, publish only independently authored documentation and examples. No license grant is invented.
-
-**Do not publish:** instructor PDF, `teacher/answer_key.json`, personal credentials or LocalStack authentication tokens, private raw logs or cloud account secrets.
-
-The attack scenario is synthetic; the real LocalStack actions are restricted to an emulator.
+**Excluded on purpose:** instructor PDF, `teacher/answer_key.json`, local `.env`, credentials, access tokens, unredacted raw local logs and large or redundant intermediate files.

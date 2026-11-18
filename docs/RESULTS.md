@@ -1,41 +1,40 @@
-# Verified lab findings
+# Verified lab results
 
-## Dataset
+## Environment
 
-- Total synthetic records: **265**.
-- Background and decoys: **247**.
-- Attack / response records: **18**.
-- CloudTrail-like compressed objects: **114**.
-- LocalStack native request lines were also converted to 76 simplified records during the exercise; **they are not CloudTrail**.
+- 2 Compose services started: `lab-shell` and `lab-localstack` (LocalStack 4.14.0 healthy).
+- S3, IAM and STS emulated successfully; CloudTrail unavailable as expected.
+- Four S3 buckets and four IAM users initialized.
+- A local demonstration attached `AdministratorAccess` to Bob, created an extra svc-backup key and removed the backup bucket; subsequent re-initialization recreated its bucket and sample object.
+- Native LocalStack request logs were parsed into **76 minimal request records** in the observed execution; they are not real CloudTrail records.
 
-## Detection at 30-minute gap threshold
+## Synthetic pipeline
 
-| Severity | Count |
-|---|---:|
-| CRITICAL | 9 |
-| HIGH | 2 |
-| MEDIUM | 2 |
-| LOW | 6 |
-| INFO | 1 |
-| **Total** | **20** |
+- `seed=42` produced **265** CloudTrail-like events: 247 background/decoy and 18 attack/response.
+- 114 compressed `.json.gz` files generated and uploaded to locally emulated S3.
+- 114 files successfully downloaded and **265 unique events** analyzed.
+- Detection counts: CRITICAL=9, HIGH=2, MEDIUM=2, LOW=6, INFO=1.
+- A **71-minute** logging gap was identified.
+- Local test with `--gap-minutes 5`: 9 Critical, 126 Medium.
+- Local test with `--gap-minutes 120`: 8 Critical, 2 Medium (missed 71-minute R08 case).
 
-These are findings, not 20 independent intrusions.
+## Sample output files
 
-## Sensitivity of logging-gap detection (R08)
+- [`examples/reports/analysis_report.md`](../examples/reports/analysis_report.md)
+- [`examples/reports/findings.json`](../examples/reports/findings.json)
+- [`examples/reports/findings.csv`](../examples/reports/findings.csv)
 
-| Gap threshold | Critical | Medium | Interpretation |
-|---|---:|---:|---|
-| 5 minutes | 9 | 126 | Excessive alerts between normal periodic events |
-| 30 minutes | 9 | 2 | Detects the ~71-minute gap with less noise |
-| 120 minutes | 8 | 2 | Misses the ~71-minute gap |
+These files are sample outputs included with the original educational starter, consistent with the reproducible seed-42 fixture. They are not production telemetry.
 
-## High-confidence observations from synthetic evidence
+## Unit test coverage
 
-- Bob: repeated login failures then success **without MFA** from `203.0.113.66`.
-- Bob: `AttachUserPolicy` granting AdministratorAccess.
-- Bob: `CreateAccessKey` for the separate identity `svc-backup`; subsequent use of the new key.
-- Bob: `DeleteBucket` targeting `corp-backups-prod`.
-- Bob: `DeleteTrail` denied by explicit SCP but `StopLogging` succeeded **in the synthetic timeline**.
-- Alice: logging restoration and IAM containment actions.
+The original `tests/test_pipeline.py` has six tests: deterministic generation, detection across all six scenarios, decoy false-positive constraint, logging gap alert, no events during the gap and CloudTrail core fields. Execute:
 
-Never infer absence of attacker actions during a logging gap from the lack of events alone.
+```bash
+python -m unittest discover -s tests -v
+python scripts/verify_fixture.py
+```
+
+## Screenshots
+
+Selected user-run screenshots are in [`docs/screenshots/`](screenshots/README.md). They demonstrate container startup, initialization, S3 access, API actions, findings, tuning and investigation. Treat image captures as evidence of what the lab terminal displayed — **not independent proof of a real AWS account compromise**.

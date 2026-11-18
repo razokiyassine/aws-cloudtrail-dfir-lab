@@ -1,38 +1,37 @@
-# TP CloudTrail — Investigation et détection cloud
+# Présentation en français — TP AWS CloudTrail
 
-Ce dépôt documente un TP d'analyse de sécurité AWS réalisé avec **LocalStack**, **AWS CLI**, **Python** et **jq**.
+## Objectif pédagogique
 
-> **Distinction fondamentale :** S3, IAM et STS sont émulés localement. Les **265 journaux au format CloudTrail sont synthétiques** et ne proviennent pas d'un service CloudTrail réel.
+Reproduire une chaîne d'investigation cloud : préparer des ressources S3/IAM émulées, collecter des journaux **synthétiques** au format CloudTrail, détecter des anomalies avec Python et expliquer une compromission avec des preuves traçables.
 
-## Objectifs pédagogiques
+**Contexte :** une entreprise fictive perd un bucket de sauvegarde et subit une interruption de la journalisation. L'analyste recherche l'identité, les actions, la période, l'IP d'origine, l'impact et les actions de réponse.
 
-1. Initialiser un environnement cloud émulé et étudier une politique IAM excessivement permissive.
-2. Manipuler des buckets S3 et quatre identités : Alice, Bob, Carol et `svc-backup`.
-3. Simuler localement une élévation de privilèges, une création de clé et une suppression de sauvegarde.
-4. Générer 265 événements CloudTrail-like en 114 fichiers compressés.
-5. Centraliser ces fichiers dans S3 local puis les analyser.
-6. Appliquer neuf règles R01 à R09 ; expliquer les faux positifs et les seuils de détection.
-7. Reconstituer un incident en six scénarios, avec `eventTime`, `eventID`, identités et adresses IP.
-8. Proposer une réponse à incident et documenter les preuves et limites.
+## Réalisations
 
-## Résultats
+1. **Environnement** : Docker Compose, conteneur d'analyse avec AWS CLI/Python/jq, LocalStack Community 4.14.
+2. **Ressources** : quatre buckets (`corp-app-data`, `corp-backups-prod`, `corp-finance-secrets`, `corp-cloudtrail-logs-synthetic`) et quatre identités IAM (`alice`, `bob`, `carol`, `svc-backup`).
+3. **Simulation locale** : attribution d'AdministratorAccess à Bob, création d'une clé pour `svc-backup`, suppression puis restauration du bucket de sauvegarde.
+4. **Journalisation** : génération reproductible de **265 événements synthétiques**, organisés en **114 fichiers `.json.gz`** et transférés dans S3 local.
+5. **Détection** : neuf règles (R01–R09) ; **20 alertes** avec le seuil de silence de 30 minutes.
+6. **Investigation** : six scénarios liés, chronologie UTC, `eventID`, IP d'origine, faux positifs, trou de journalisation de 71 minutes.
+7. **Documentation** : rapport Markdown/JSON/CSV, captures d'écran et recommandations.
 
-**265 événements**, **114 fichiers .json.gz**, **20 alertes** au seuil de 30 min : 9 CRITICAL, 2 HIGH, 2 MEDIUM, 6 LOW, 1 INFO.
+## Résultats observés
 
-L'investigation synthétique décrit un accès suspect au compte Bob sans MFA, des requêtes IAM/S3 refusées, une élévation de privilèges, la création d'une clé pour `svc-backup`, la suppression du bucket `corp-backups-prod` et un arrêt de journalisation d'environ 71 minutes.
+| Gravité | Nombre |
+| --- | ---: |
+| CRITICAL | 9 |
+| HIGH | 2 |
+| MEDIUM | 2 |
+| LOW | 6 |
+| INFO | 1 |
 
-## Documentation
+Un seuil de silence de **5 min** génère 126 alertes MEDIUM (beaucoup de bruit). À **120 min**, le trou de 71 min n'est plus détecté par R08. Le seuil de **30 min** a été conservé pour ce dataset ; il ne constitue pas un réglage universel.
 
-- [Architecture](ARCHITECTURE.md)
-- [Installation et exécution](SETUP.md)
-- [Règles de détection](DETECTION_RULES.md)
-- [Investigation détaillée](INCIDENT_WALKTHROUGH.md)
-- [Résultats](RESULTS.md)
-- [Dépannage](TROUBLESHOOTING.md)
-- [Attribution des sources](SOURCE_ATTRIBUTION.md)
+## Ce qui a vraiment été réalisé
 
-## Ce que l'étudiant a réellement fait
+Les appels S3/IAM au niveau LocalStack ont réellement modifié **l'émulateur local**, mais n'ont pas été effectués dans un compte AWS public. Les événements CloudTrail investigués proviennent de `generate_events.py` et **ne sont pas des journaux AWS réels**. Les événements synthétiques attribués à Bob ne prouvent pas qu'un test IAM réel a été conduit avec des identifiants de Bob.
 
-Configuration et dépannage Docker, validation des services émulés, commandes S3/IAM, simulation d'activité, collecte, analyse JSON, réglage des seuils, chronologie avec preuves, recommandations et compte rendu.
+## Pour commencer
 
-Le cours original est attribué à **Pr. JAADOUNI Hatim (EMSI)**. Les scripts de départ et données synthétiques provenaient du support pédagogique : leur origine doit être reconnue.
+Voir le guide [SETUP.md](SETUP.md), puis [DETECTION_RULES.md](DETECTION_RULES.md), [INCIDENT_WALKTHROUGH.md](INCIDENT_WALKTHROUGH.md) et [TROUBLESHOOTING.md](TROUBLESHOOTING.md).

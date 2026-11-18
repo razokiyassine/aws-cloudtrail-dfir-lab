@@ -1,39 +1,50 @@
-# Architecture et flux de données
+# Architecture — implementation versus evidence
 
-## Deux sources de données distinctes
+The distinction below is critical: **LocalStack API request logs and synthetic CloudTrail-like records come from different sources.** The synthetic events are not emitted by the LocalStack API actions.
 
-**Source 1 — Requêtes natives LocalStack.** Le conteneur `lab` envoie via AWS CLI des requêtes HTTP vers `http://localstack:4566`. LocalStack Community 4.14 émule S3, IAM et STS. Les journaux du serveur montrent des opérations et leurs codes HTTP (200, 204, 404, 501). Ce ne sont **pas** des événements CloudTrail.
-
-**Source 2 — Dataset CloudTrail synthétique.** `src/generate_events.py` produit un jeu déterministe de 265 enregistrements (247 bruit/leurres et 18 événements d'attaque/réponse), répartis dans 114 fichiers JSON gzip au format `AWSLogs/<account>/CloudTrail/<region>/YYYY/MM/DD/`.
+## 1. Actual local API execution
 
 ```mermaid
-flowchart TD
-  A["AWS CLI: S3 / IAM / STS"] --> B["LocalStack emulator"]
-  B --> C["Native request logs"]
-  D["Synthetic event generator (seed 42)"] --> E["265 CloudTrail-like events"]
-  E --> F["114 compressed JSON files"]
-  F --> G["Local S3 bucket"]
-  G --> H["Collection → parsing → deduplication"]
-  H --> I["Python rules R01–R09"]
-  I --> J["Findings + timeline + investigation"]
-  C -. "supporting, separate source" .-> J
+flowchart LR
+    A[lab container: AWS CLI] -->|HTTP :4566| B[LocalStack Community 4.14]
+    B --> C[(Emulated S3)]
+    B --> D[Emulated IAM / STS]
+    B --> E[Native LocalStack request logs]
+    E --> F[parse_localstack_logs.py]
+    F --> G[Minimal LocalStackRequestLog JSON]
 ```
 
-## Services and logical assets
+The `02_generate_activity.sh` script executes operations against the emulator. In the observed run, the native logs included successful `iam.AttachUserPolicy`, `iam.CreateAccessKey`, and `s3.DeleteBucket` requests, but `cloudtrail.StopLogging` returned an unsupported-service error.
 
-- `corp-app-data`: application objects.
-- `corp-backups-prod`: sample production backups.
-- `corp-finance-secrets`: simulated sensitive financial records.
-- `corp-cloudtrail-logs-synthetic`: synthetic evidence objects.
-- Users: `alice`, `bob`, `carol`, `svc-backup`.
-- `DevPolicy`: intentionally over-permissive `iam:AttachUserPolicy`, `iam:CreateAccessKey` and S3 actions.
+## 2. Synthetic CloudTrail-format detection pipeline
 
-## Host vs analysis container
+```mermaid
+flowchart LR
+    H[generate_events.py\nseed=42] --> I[265 synthetic CloudTrail-style events]
+    I --> J[114 compressed JSON files]
+    J --> K[(LocalStack S3 bucket\ncorp-cloudtrail-logs-synthetic)]
+    K --> L[04_collect_and_analyze.sh]
+    L --> M[Python load, deduplicate\nby eventID and sort]
+    M --> N[Detection rules R01-R09]
+    N --> O[20 findings\n9 Critical, 2 High, 2 Medium, 6 Low, 1 Info]
+    O --> P[Markdown / JSON / CSV reports]
+    P --> Q[Investigation timeline / recommendations]
+```
 
-Run `docker compose ...` on the Docker host. Run `aws`, `jq`, `python` and `bash scripts/*.sh` **inside `lab`**, where the local endpoint and dummy credentials are set.
+## CloudTrail-style fields used
 
-The Compose port binding `127.0.0.1:4566:4566` limits external exposure. The `lab` container reaches the emulator by Docker DNS via the hostname `localstack`.
+| Field | Analysis purpose |
+| --- | --- |
+| `eventTime` | UTC chronology |
+| `userIdentity` | actor and access key |
+| `eventName` and `eventSource` | API action and service |
+| `sourceIPAddress` | source correlation and out-of-perimeter detection |
+| `errorCode` and `responseElements` | operation result and access denials |
+| `requestParameters` | targeted resource or user |
+| `eventID` | traceable evidence identifier |
 
-## Limitations
+## Network boundary
 
-No real AWS tenant, no real CloudTrail service, no complete IAM enforcement in LocalStack Community, no proof of what happened during the synthetic logging gap. The architecture image is a presentation aid; the scripts and trace files define the actual observed behavior.
+Docker Compose connects `lab` to LocalStack by the hostname `localstack` over port `4566`. LocalStack publishes `127.0.0.1:4566`, avoiding unnecessary exposure to a local LAN. The optional DNS troubleshooting overlay changes **build networking only**, not runtime networking.
+
+See [the original selected visual](../assets/cloudtrail-architecture.png). It is a conceptual overview; the Mermaid diagrams above show the actual source-of-evidence separation more explicitly.

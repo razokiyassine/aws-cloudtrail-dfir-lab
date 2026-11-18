@@ -1,13 +1,13 @@
-# Portfolio project summary
+# Portfolio description
 
-**Title:** AWS CloudTrail DFIR Lab — IAM/S3 Attack Detection & Investigation
+## Short English summary
 
-**Technical scope:** Python, AWS CLI, LocalStack, Docker Compose, S3, IAM, STS, JSON/jq, rule-based detection, evidence correlation.
+**Cloud Security / DFIR lab — AWS CloudTrail-format Detection & Incident Investigation:** Reproduced an educational local S3/IAM environment using Docker and LocalStack. Generated and ingested 265 deterministic **synthetic** CloudTrail-style events in 114 compressed S3 objects; analyzed them using Python detection rules R01–R09 and reconstructed a six-stage IAM/S3 attack narrative. Practiced evidence correlation, false-positive tuning (5/30/120-minute log-gap thresholds) and remediation planning. **No real AWS account or native CloudTrail service was used.**
 
-**What was executed:** provisioned an isolated AWS-like local environment; validated S3/IAM/STS; manipulated sample storage and permissions; generated, uploaded and collected deterministic synthetic CloudTrail-like records; applied nine detection rules; analyzed 20 findings; investigated six connected scenarios and documented incident-response recommendations.
+## Présentation courte en français
 
-**Results:** 265 synthetic events; 114 gzip JSON log files; 9 CRITICAL, 2 HIGH, 2 MEDIUM, 6 LOW, 1 INFO alerts using default tuning; investigated ~71-minute synthetic logging gap.
+**Laboratoire Cloud Security / DFIR — Détection et investigation sur journaux de type AWS CloudTrail :** réalisation d'un environnement S3/IAM émulé avec Docker et LocalStack, génération de 265 événements **synthétiques** répartis dans 114 fichiers compressés, application de neuf règles de détection Python et investigation d'une chaîne de six scénarios cloud. Analyse des preuves `eventID`, réglage des seuils et propositions de remédiation. Aucun compte AWS réel ni service CloudTrail actif n'a été utilisé.
 
-**Integrity statement:** Native S3/IAM operations were run against LocalStack. CloudTrail was not available; the CloudTrail-style evidence and its successful logging-disable operation were synthetic.
+## Suggested skills / topics
 
-**Suggested resume bullet:** “Implemented and documented a local Cloud Security DFIR workflow using AWS-style S3/IAM APIs, Python log collection and nine detection rules; investigated a deterministic 265-event synthetic CloudTrail scenario with evidence-linked chronology and false-positive tuning.”
+Docker, Docker Compose, AWS CLI, LocalStack, AWS S3/IAM/STS concepts, CloudTrail JSON format, Python, jq, detection engineering, incident timeline, IAM privilege escalation analysis, backup security, logging defense impairment, MITRE ATT&CK.

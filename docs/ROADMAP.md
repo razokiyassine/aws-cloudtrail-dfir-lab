@@ -1,10 +1,9 @@
-# Potential extensions (not yet implemented)
+# Roadmap (proposals, not implemented features)
 
-These are ideas for future improvement, **not claims of completed work**.
-
-- [ ] Add an R10 detection rule with a unit test and documented false-positive analysis.
-- [ ] Export findings to an open-source SIEM with dashboards.
-- [ ] Add a JSON schema validator and malformed-record tests.
-- [ ] Build an investigator's timeline view and evidence export.
-- [ ] Correlate additional independent data sources to investigate silent periods.
-- [ ] Document a clean-room implementation of course starter code for unrestricted publication.
+- [ ] Add a configurable R10 correlation rule with matching test cases.
+- [ ] Add isolated live LocalStack integration tests (separate from pure Python unit tests).
+- [ ] Export findings to Wazuh, OpenSearch or another SIEM.
+- [ ] Build a compact incident dashboard with case status, severity and timeline.
+- [ ] Introduce additional IAM escalation scenarios and controls.
+- [ ] Track false-positive rates and measure detection performance on additional synthetic datasets.
+- [ ] Develop reproducible Terraform configuration for an optional **authorized** real AWS sandbox with budget controls (not part of the current lab).

@@ -1,0 +1,382 @@
+[
+  {
+    "rule": "R07",
+    "title": "Échecs de connexion console répétés",
+    "severity": "CRITICAL",
+    "eventID": "4970ed9a-09ce-4cfb-a339-ba1925637cc3",
+    "eventTime": "2026-10-29T02:11:07Z",
+    "eventName": "ConsoleLogin",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "us-east-1",
+    "details": "3 échecs de connexion pour bob depuis 203.0.113.66 puis SUCCÈS à 2026-10-29T02:14:30Z (compromission probable)",
+    "mitre": "T1110 Brute Force",
+    "external_ip": true,
+    "related_eventIDs": [
+      "4970ed9a-09ce-4cfb-a339-ba1925637cc3",
+      "b49e04cc-c243-49e7-a387-eaf6d4c3a832",
+      "41843b03-04dd-4054-9448-23f7e7e646c7",
+      "871c0884-9bdf-40f2-ba2c-0f19f0b2a5d1"
+    ],
+    "recommendation": "Verrouiller/surveiller le compte, imposer MFA, filtrer par IP source, activer des alertes sur ConsoleLogin=Failure, réinitialiser le mot de passe si succès consécutif."
+  },
+  {
+    "rule": "R01",
+    "title": "Connexion console sans MFA",
+    "severity": "CRITICAL",
+    "eventID": "871c0884-9bdf-40f2-ba2c-0f19f0b2a5d1",
+    "eventTime": "2026-10-29T02:14:30Z",
+    "eventName": "ConsoleLogin",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "us-east-1",
+    "details": "Connexion réussie de bob sans MFA depuis 203.0.113.66",
+    "mitre": "T1078.004 Valid Accounts: Cloud Accounts",
+    "external_ip": true,
+    "related_eventIDs": [
+      "871c0884-9bdf-40f2-ba2c-0f19f0b2a5d1"
+    ],
+    "recommendation": "Imposer le MFA à tous les utilisateurs IAM (politique deny-sans-MFA), réinitialiser le mot de passe du compte, révoquer les sessions actives, privilégier IAM Identity Center."
+  },
+  {
+    "rule": "R06",
+    "title": "Accès refusé(s) à des ressources",
+    "severity": "CRITICAL",
+    "eventID": "b7f28572-3def-4849-9336-4f7e83efa9f3",
+    "eventTime": "2026-10-29T02:16:02Z",
+    "eventName": "ListUsers",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "us-east-1",
+    "details": "RAFALE : 4 refus en <10 min pour bob (GetBucketPolicy, GetObject, ListRoles, ListUsers) depuis 203.0.113.66",
+    "mitre": "T1580 Cloud Infrastructure Discovery / T1087.004 Cloud Account Discovery",
+    "external_ip": true,
+    "related_eventIDs": [
+      "b7f28572-3def-4849-9336-4f7e83efa9f3",
+      "40ef3935-5f90-4ed6-bb25-664d630aa767",
+      "10275b53-2285-42ef-8fbe-4fe92ea9c542",
+      "0c3ce284-c7e5-4bbb-9cb5-1c535b62a8df"
+    ],
+    "recommendation": "Investiguer l'identité source, vérifier la légitimité du besoin, appliquer le moindre privilège, ajouter une alerte de seuil sur les AccessDenied."
+  },
+  {
+    "rule": "R02",
+    "title": "Attribution de privilèges administrateur",
+    "severity": "CRITICAL",
+    "eventID": "6cac028c-ba22-4065-9526-0718cd180a82",
+    "eventTime": "2026-10-29T02:21:40Z",
+    "eventName": "AttachUserPolicy",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "us-east-1",
+    "details": "bob -> AttachUserPolicy arn:aws:iam::aws:policy/AdministratorAccess sur 'bob' (attribution réussie) depuis 203.0.113.66",
+    "mitre": "T1098.003 Account Manipulation: Additional Cloud Roles",
+    "external_ip": true,
+    "related_eventIDs": [
+      "6cac028c-ba22-4065-9526-0718cd180a82"
+    ],
+    "recommendation": "Détacher la politique, retirer iam:AttachUserPolicy aux non-administrateurs, définir une permissions boundary / SCP interdisant l'auto-élévation, alerter en temps réel (EventBridge)."
+  },
+  {
+    "rule": "R03",
+    "title": "Clé d'accès non autorisée / usage suspect",
+    "severity": "CRITICAL",
+    "eventID": "e95f176c-deba-4186-ba10-82170ad7c9a2",
+    "eventTime": "2026-10-29T02:23:15Z",
+    "eventName": "CreateAccessKey",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "us-east-1",
+    "details": "bob a créé une clé d'accès pour un AUTRE utilisateur 'svc-backup' (clé AKIALABROGUE00000001) depuis 203.0.113.66",
+    "mitre": "T1098.001 Account Manipulation: Additional Cloud Credentials",
+    "external_ip": true,
+    "related_eventIDs": [
+      "e95f176c-deba-4186-ba10-82170ad7c9a2"
+    ],
+    "recommendation": "Désactiver puis supprimer la clé, auditer toutes les actions faites avec, limiter iam:CreateAccessKey (Condition aws:username), préférer des rôles/sessions temporaires aux clés longues."
+  },
+  {
+    "rule": "R04",
+    "title": "Suppression de bucket S3",
+    "severity": "CRITICAL",
+    "eventID": "1e2595b8-8fc9-486b-a9dd-ebf563119aca",
+    "eventTime": "2026-10-29T02:33:05Z",
+    "eventName": "DeleteBucket",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "eu-west-3",
+    "details": "bob a supprimé le bucket 'corp-backups-prod' depuis 203.0.113.66",
+    "mitre": "T1485 Data Destruction",
+    "external_ip": true,
+    "related_eventIDs": [
+      "1e2595b8-8fc9-486b-a9dd-ebf563119aca"
+    ],
+    "recommendation": "Activer versioning + MFA Delete + Object Lock sur les buckets critiques, répliquer vers un autre compte, restreindre s3:DeleteBucket, restaurer depuis la sauvegarde isolée."
+  },
+  {
+    "rule": "R05",
+    "title": "Altération de la journalisation CloudTrail",
+    "severity": "CRITICAL",
+    "eventID": "51d08109-fc90-4838-9874-1408f7b217c7",
+    "eventTime": "2026-10-29T02:39:20Z",
+    "eventName": "DeleteTrail",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "eu-west-3",
+    "details": "bob : DeleteTrail sur arn:aws:cloudtrail:eu-west-3:000000000000:trail/corp-trail -> tentative REFUSÉE (AccessDeniedException) depuis 203.0.113.66",
+    "mitre": "T1562.008 Impair Defenses: Disable or Modify Cloud Logs",
+    "external_ip": true,
+    "related_eventIDs": [
+      "51d08109-fc90-4838-9874-1408f7b217c7"
+    ],
+    "recommendation": "Relancer la trail, protéger cloudtrail:StopLogging/DeleteTrail/UpdateTrail par SCP (Organizations), trail multi-région + validation d'intégrité des fichiers, copie des logs vers un compte de logs dédié."
+  },
+  {
+    "rule": "R05",
+    "title": "Altération de la journalisation CloudTrail",
+    "severity": "CRITICAL",
+    "eventID": "fba6abf7-cdbc-4653-b7a7-e8b75e70f65f",
+    "eventTime": "2026-10-29T02:41:03Z",
+    "eventName": "StopLogging",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "eu-west-3",
+    "details": "bob : StopLogging sur arn:aws:cloudtrail:eu-west-3:000000000000:trail/corp-trail -> tentative RÉUSSIE depuis 203.0.113.66",
+    "mitre": "T1562.008 Impair Defenses: Disable or Modify Cloud Logs",
+    "external_ip": true,
+    "related_eventIDs": [
+      "fba6abf7-cdbc-4653-b7a7-e8b75e70f65f"
+    ],
+    "recommendation": "Relancer la trail, protéger cloudtrail:StopLogging/DeleteTrail/UpdateTrail par SCP (Organizations), trail multi-région + validation d'intégrité des fichiers, copie des logs vers un compte de logs dédié."
+  },
+  {
+    "rule": "R08",
+    "title": "Trou de journalisation",
+    "severity": "CRITICAL",
+    "eventID": "fba6abf7-cdbc-4653-b7a7-e8b75e70f65f",
+    "eventTime": "2026-10-29T02:41:03Z",
+    "eventName": "StopLogging",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "eu-west-3",
+    "details": "Aucun événement de 2026-10-29T02:41:03Z à 2026-10-29T03:52:10Z (71 min). Cause probable : StopLogging par bob à 2026-10-29T02:41:03Z, redémarrage par alice (StartLogging). Toute action pendant ce créneau est INVISIBLE dans CloudTrail.",
+    "mitre": "T1562.008 Impair Defenses: Disable or Modify Cloud Logs",
+    "external_ip": true,
+    "related_eventIDs": [
+      "fba6abf7-cdbc-4653-b7a7-e8b75e70f65f",
+      "c7bf4fbc-d43c-4d6d-a0c1-ff1e20da8972"
+    ],
+    "recommendation": "Déterminer la cause (StopLogging ? panne ?), relancer la trail, reconstituer l'activité avec d'autres sources (S3 server access logs, GuardDuty, VPC Flow Logs, CloudWatch), alarme IsLogging=false."
+  },
+  {
+    "rule": "R09",
+    "title": "Activité depuis une IP hors périmètre",
+    "severity": "HIGH",
+    "eventID": "4970ed9a-09ce-4cfb-a339-ba1925637cc3",
+    "eventTime": "2026-10-29T02:11:07Z",
+    "eventName": "ConsoleLogin",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "us-east-1",
+    "details": "14 événement(s) de bob depuis l'IP hors périmètre 203.0.113.66 (2026-10-29T02:11:07Z -> 2026-10-29T02:41:03Z) : ConsoleLoginx4, ListUsersx1, ListRolesx1, GetBucketPolicyx1, GetObjectx1, AttachUserPolicyx1",
+    "mitre": "T1078.004 Valid Accounts: Cloud Accounts",
+    "external_ip": true,
+    "related_eventIDs": [
+      "4970ed9a-09ce-4cfb-a339-ba1925637cc3",
+      "b49e04cc-c243-49e7-a387-eaf6d4c3a832",
+      "41843b03-04dd-4054-9448-23f7e7e646c7",
+      "871c0884-9bdf-40f2-ba2c-0f19f0b2a5d1",
+      "b7f28572-3def-4849-9336-4f7e83efa9f3",
+      "40ef3935-5f90-4ed6-bb25-664d630aa767",
+      "10275b53-2285-42ef-8fbe-4fe92ea9c542",
+      "0c3ce284-c7e5-4bbb-9cb5-1c535b62a8df",
+      "6cac028c-ba22-4065-9526-0718cd180a82",
+      "e95f176c-deba-4186-ba10-82170ad7c9a2",
+      "add702c9-2747-493c-9ae7-7eab084a6780",
+      "1e2595b8-8fc9-486b-a9dd-ebf563119aca",
+      "51d08109-fc90-4838-9874-1408f7b217c7",
+      "fba6abf7-cdbc-4653-b7a7-e8b75e70f65f"
+    ],
+    "recommendation": "Vérifier la géolocalisation/ASN, restreindre par condition aws:SourceIp, révoquer les identifiants concernés, enrichir avec une liste d'IP de confiance."
+  },
+  {
+    "rule": "R03",
+    "title": "Clé d'accès non autorisée / usage suspect",
+    "severity": "HIGH",
+    "eventID": "ca9e4a62-fae3-414b-a3b4-42bd46494296",
+    "eventTime": "2026-10-29T02:26:48Z",
+    "eventName": "GetCallerIdentity",
+    "principal": "svc-backup",
+    "sourceIP": "203.0.113.66",
+    "region": "us-east-1",
+    "details": "Clé AKIALABROGUE00000001 (créée à 2026-10-29T02:23:15Z par bob) utilisée depuis l'IP externe 203.0.113.66 (GetCallerIdentity)",
+    "mitre": "T1098.001 Account Manipulation: Additional Cloud Credentials",
+    "external_ip": true,
+    "related_eventIDs": [
+      "ca9e4a62-fae3-414b-a3b4-42bd46494296"
+    ],
+    "recommendation": "Désactiver puis supprimer la clé, auditer toutes les actions faites avec, limiter iam:CreateAccessKey (Condition aws:username), préférer des rôles/sessions temporaires aux clés longues."
+  },
+  {
+    "rule": "R04",
+    "title": "Suppression de bucket S3",
+    "severity": "MEDIUM",
+    "eventID": "d6016237-ac9e-4156-b63f-ce413a9aca5e",
+    "eventTime": "2026-10-28T11:50:27Z",
+    "eventName": "DeleteBucket",
+    "principal": "alice",
+    "sourceIP": "198.51.100.10",
+    "region": "eu-west-3",
+    "details": "alice a supprimé le bucket 'tmp-test-bucket-7f3a' depuis 198.51.100.10",
+    "mitre": "T1485 Data Destruction",
+    "external_ip": false,
+    "related_eventIDs": [
+      "d6016237-ac9e-4156-b63f-ce413a9aca5e"
+    ],
+    "recommendation": "Activer versioning + MFA Delete + Object Lock sur les buckets critiques, répliquer vers un autre compte, restreindre s3:DeleteBucket, restaurer depuis la sauvegarde isolée."
+  },
+  {
+    "rule": "R09",
+    "title": "Activité depuis une IP hors périmètre",
+    "severity": "MEDIUM",
+    "eventID": "ca9e4a62-fae3-414b-a3b4-42bd46494296",
+    "eventTime": "2026-10-29T02:26:48Z",
+    "eventName": "GetCallerIdentity",
+    "principal": "svc-backup",
+    "sourceIP": "203.0.113.66",
+    "region": "us-east-1",
+    "details": "1 événement(s) de svc-backup depuis l'IP hors périmètre 203.0.113.66 (2026-10-29T02:26:48Z -> 2026-10-29T02:26:48Z) : GetCallerIdentityx1",
+    "mitre": "T1078.004 Valid Accounts: Cloud Accounts",
+    "external_ip": true,
+    "related_eventIDs": [
+      "ca9e4a62-fae3-414b-a3b4-42bd46494296"
+    ],
+    "recommendation": "Vérifier la géolocalisation/ASN, restreindre par condition aws:SourceIp, révoquer les identifiants concernés, enrichir avec une liste d'IP de confiance."
+  },
+  {
+    "rule": "R06",
+    "title": "Accès refusé(s) à des ressources",
+    "severity": "LOW",
+    "eventID": "ac1aa554-c3c7-4611-bfe3-fa49054f92ff",
+    "eventTime": "2026-10-28T14:20:09Z",
+    "eventName": "ListUsers",
+    "principal": "carol",
+    "sourceIP": "198.51.100.31",
+    "region": "us-east-1",
+    "details": "carol : ListUsers refusé (AccessDenied) depuis 198.51.100.31",
+    "mitre": "T1580 Cloud Infrastructure Discovery / T1087.004 Cloud Account Discovery",
+    "external_ip": false,
+    "related_eventIDs": [
+      "ac1aa554-c3c7-4611-bfe3-fa49054f92ff"
+    ],
+    "recommendation": "Investiguer l'identité source, vérifier la légitimité du besoin, appliquer le moindre privilège, ajouter une alerte de seuil sur les AccessDenied."
+  },
+  {
+    "rule": "R06",
+    "title": "Accès refusé(s) à des ressources",
+    "severity": "LOW",
+    "eventID": "b7f28572-3def-4849-9336-4f7e83efa9f3",
+    "eventTime": "2026-10-29T02:16:02Z",
+    "eventName": "ListUsers",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "us-east-1",
+    "details": "bob : ListUsers refusé (AccessDenied) depuis 203.0.113.66",
+    "mitre": "T1580 Cloud Infrastructure Discovery / T1087.004 Cloud Account Discovery",
+    "external_ip": true,
+    "related_eventIDs": [
+      "b7f28572-3def-4849-9336-4f7e83efa9f3"
+    ],
+    "recommendation": "Investiguer l'identité source, vérifier la légitimité du besoin, appliquer le moindre privilège, ajouter une alerte de seuil sur les AccessDenied."
+  },
+  {
+    "rule": "R06",
+    "title": "Accès refusé(s) à des ressources",
+    "severity": "LOW",
+    "eventID": "40ef3935-5f90-4ed6-bb25-664d630aa767",
+    "eventTime": "2026-10-29T02:16:40Z",
+    "eventName": "ListRoles",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "us-east-1",
+    "details": "bob : ListRoles refusé (AccessDenied) depuis 203.0.113.66",
+    "mitre": "T1580 Cloud Infrastructure Discovery / T1087.004 Cloud Account Discovery",
+    "external_ip": true,
+    "related_eventIDs": [
+      "40ef3935-5f90-4ed6-bb25-664d630aa767"
+    ],
+    "recommendation": "Investiguer l'identité source, vérifier la légitimité du besoin, appliquer le moindre privilège, ajouter une alerte de seuil sur les AccessDenied."
+  },
+  {
+    "rule": "R06",
+    "title": "Accès refusé(s) à des ressources",
+    "severity": "LOW",
+    "eventID": "10275b53-2285-42ef-8fbe-4fe92ea9c542",
+    "eventTime": "2026-10-29T02:17:25Z",
+    "eventName": "GetBucketPolicy",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "eu-west-3",
+    "details": "bob : GetBucketPolicy refusé (AccessDenied) depuis 203.0.113.66",
+    "mitre": "T1580 Cloud Infrastructure Discovery / T1087.004 Cloud Account Discovery",
+    "external_ip": true,
+    "related_eventIDs": [
+      "10275b53-2285-42ef-8fbe-4fe92ea9c542"
+    ],
+    "recommendation": "Investiguer l'identité source, vérifier la légitimité du besoin, appliquer le moindre privilège, ajouter une alerte de seuil sur les AccessDenied."
+  },
+  {
+    "rule": "R06",
+    "title": "Accès refusé(s) à des ressources",
+    "severity": "LOW",
+    "eventID": "0c3ce284-c7e5-4bbb-9cb5-1c535b62a8df",
+    "eventTime": "2026-10-29T02:18:03Z",
+    "eventName": "GetObject",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "eu-west-3",
+    "details": "bob : GetObject refusé (AccessDenied) depuis 203.0.113.66",
+    "mitre": "T1580 Cloud Infrastructure Discovery / T1087.004 Cloud Account Discovery",
+    "external_ip": true,
+    "related_eventIDs": [
+      "0c3ce284-c7e5-4bbb-9cb5-1c535b62a8df"
+    ],
+    "recommendation": "Investiguer l'identité source, vérifier la légitimité du besoin, appliquer le moindre privilège, ajouter une alerte de seuil sur les AccessDenied."
+  },
+  {
+    "rule": "R06",
+    "title": "Accès refusé(s) à des ressources",
+    "severity": "LOW",
+    "eventID": "51d08109-fc90-4838-9874-1408f7b217c7",
+    "eventTime": "2026-10-29T02:39:20Z",
+    "eventName": "DeleteTrail",
+    "principal": "bob",
+    "sourceIP": "203.0.113.66",
+    "region": "eu-west-3",
+    "details": "bob : DeleteTrail refusé (AccessDeniedException) depuis 203.0.113.66",
+    "mitre": "T1580 Cloud Infrastructure Discovery / T1087.004 Cloud Account Discovery",
+    "external_ip": true,
+    "related_eventIDs": [
+      "51d08109-fc90-4838-9874-1408f7b217c7"
+    ],
+    "recommendation": "Investiguer l'identité source, vérifier la légitimité du besoin, appliquer le moindre privilège, ajouter une alerte de seuil sur les AccessDenied."
+  },
+  {
+    "rule": "R03",
+    "title": "Clé d'accès non autorisée / usage suspect",
+    "severity": "INFO",
+    "eventID": "26d794d3-0db9-4301-afbb-411aa1235a8c",
+    "eventTime": "2026-10-28T09:32:10Z",
+    "eventName": "CreateAccessKey",
+    "principal": "alice",
+    "sourceIP": "198.51.100.10",
+    "region": "us-east-1",
+    "details": "alice crée une clé pour lui-même depuis une IP interne (rotation probable : à vérifier)",
+    "mitre": "T1098.001 Account Manipulation: Additional Cloud Credentials",
+    "external_ip": false,
+    "related_eventIDs": [
+      "26d794d3-0db9-4301-afbb-411aa1235a8c"
+    ],
+    "recommendation": "Désactiver puis supprimer la clé, auditer toutes les actions faites avec, limiter iam:CreateAccessKey (Condition aws:username), préférer des rôles/sessions temporaires aux clés longues."
+  }
+]
