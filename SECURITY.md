@@ -1,13 +1,11 @@
-# Security and ethical scope
+# Security policy / educational scope
 
-This is an **isolated educational lab**. It does not use an AWS account and must not be misrepresented as a production intrusion or real CloudTrail investigation.
+This repository intentionally includes an **over-permissive IAM policy** and scripts that modify a local S3/IAM emulator. They are **teaching examples**, not recommended production configurations.
 
-- The IAM policy in `config/dev-policy.json` is **deliberately insecure**.
-- Never execute the scripts against real AWS endpoints or production data.
-- The helper script `scripts/lib.sh` restricts the lab to localhost, LocalStack or Moto.
-- Do not commit `.env`, authentication tokens, cloud credentials or private log exports.
-- Do not commit instructor solutions, including `teacher/answer_key.json`.
-- The IP address `203.0.113.66` is from documentation-only address space.
-- Synthetic CloudTrail records are not authoritative evidence of real AWS actions.
+- Run only against your own isolated LocalStack environment.
+- Do not commit `.env`, AWS credentials, access tokens, private keys or actual workplace logs.
+- A generated `teacher/answer_key.json` is excluded by `.gitignore`; do not distribute it.
+- CloudTrail-format logs in `data/` are synthetic. Do not use them as evidence of a real external attack.
+- The CI workflow runs local Python tests only and needs no secrets.
 
-For vulnerability reports, privately contact the project maintainer. Do not post sensitive credentials or exploit details in public issues.
+Please report any accidental real credential exposure privately to the repository maintainer; revoke the exposed credential immediately.

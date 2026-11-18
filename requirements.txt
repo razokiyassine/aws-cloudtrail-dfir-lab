@@ -1,0 +1,4 @@
+# Les scripts du TP (generate_events.py, analyze_logs.py, parse_localstack_logs.py) n'utilisent QUE la
+# bibliothèque standard de Python (3.9+). Ces paquets servent uniquement au conteneur "lab".
+awscli>=1.32,<2        # AWS CLI v1 (installable par pip) ; supporte la variable AWS_ENDPOINT_URL
+awscli-local>=0.22     # fournit la commande "awslocal" (raccourci optionnel)

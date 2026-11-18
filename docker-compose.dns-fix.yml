@@ -1,0 +1,8 @@
+# OPTIONAL troubleshooting overlay for hosts with DNS failures inside Docker builds.
+# Apply ONLY to building `lab`: docker compose -f docker-compose.yml -f docker-compose.dns-fix.yml build lab
+# Runtime containers continue using the default Compose network.
+services:
+  lab:
+    build:
+      context: .
+      network: host

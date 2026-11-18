@@ -1,0 +1,9 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {"Sid": "DevS3AndRead", "Effect": "Allow",
+     "Action": ["s3:*", "ec2:Describe*", "logs:Describe*", "lambda:List*"], "Resource": "*"},
+    {"Sid": "ERREUR-DE-CONFIGURATION-A-TROUVER", "Effect": "Allow",
+     "Action": ["iam:AttachUserPolicy", "iam:CreateAccessKey"], "Resource": "*"}
+  ]
+}
