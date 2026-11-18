@@ -1,0 +1,43 @@
+# Local secrets and credentials
+.env
+.env.*
+!.env.example
+.aws/
+**/credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*token*.txt
+secrets*.json
+
+# Instructor-only and generated confidential material
+teacher/
+**/answer_key.json
+**/CORRIGE.md
+
+# Transient runtime data
+collected/
+reports/
+rendu/
+data/localstack_requests/
+
+# Python and editor outputs
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+__MACOSX/
+*.log
+*.swp
+
+# Infrastructure state
+terraform.tfstate*
+*.tfvars
+build/
+dist/
